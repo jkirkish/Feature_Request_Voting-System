@@ -1,0 +1,83 @@
+datasource db {
+  provider = "mysql"
+  url      = "mysql://root:root@localhost:3306/voting_system"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String        @id @default(cuid())
+  name          String?
+  email         String?       @unique
+  emailVerified DateTime?
+  password      String?
+  image         String?
+  role          UserRole      @default(USER)
+  accounts      Account[]
+  sessions      Session[]
+  features      Feature[]
+  votes         FeatureVote[]
+}
+
+model Feature {
+  id          String        @id @default(cuid())
+  title       String
+  description String
+  status      FeatureStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  creatorId   String
+  creator     User          @relation(fields: [creatorId], references: [id])
+  votes       FeatureVote[]
+}
+
+model FeatureVote {
+  id        String   @id @default(cuid())
+  featureId String
+  userId    String
+  createdAt DateTime @default(now())
+  feature   Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([featureId, userId])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum FeatureStatus {
+  PENDING
+  PLANNED
+  COMPLETED
+}

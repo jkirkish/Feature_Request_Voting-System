@@ -1,0 +1,27 @@
+# Create a new Next.js project with React
+npx create-next-app@latest feature-voting-system --typescript --tailwind --eslint
+
+# Navigate into the project directory
+cd feature-voting-system
+
+# Install additional dependencies for our feature voting system
+npm install @prisma/client @auth/prisma-adapter @next-auth/prisma-adapter next-auth bcryptjs
+npm install prisma --save-dev
+
+# Initialize Prisma
+npx prisma init
+
+# Install Next.js and React
+npm install next@latest react@latest react-dom@latest
+
+# First generate the Prisma Client
+npx prisma generate
+
+# Then push the schema to the database
+npx prisma db push
+
+# Create a migration
+npx prisma migrate dev --name init
+
+mkdir src/lib
+mkdir src/components 
