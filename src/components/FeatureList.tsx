@@ -2,6 +2,7 @@
 
 import { Feature, FeatureStatus } from '@prisma/client'
 import { useState } from 'react'
+import { featureApi } from '@/lib/api'
 
 interface FeatureListProps {
   features: (Feature & {
@@ -12,6 +13,7 @@ interface FeatureListProps {
     _count: {
       votes: number
     }
+    status: FeatureStatus
   })[]
   isAdmin: boolean
 }
@@ -22,9 +24,7 @@ export default function FeatureList({ features, isAdmin }: FeatureListProps) {
   const handleVote = async (featureId: string) => {
     setLoading(featureId)
     try {
-      await fetch(`/api/features/${featureId}/vote`, {
-        method: 'POST',
-      })
+      await featureApi.vote(featureId)
       window.location.reload()
     } catch (error) {
       console.error('Error voting:', error)
@@ -35,13 +35,7 @@ export default function FeatureList({ features, isAdmin }: FeatureListProps) {
   const handleStatusChange = async (featureId: string, status: FeatureStatus) => {
     setLoading(featureId)
     try {
-      await fetch(`/api/features/${featureId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status }),
-      })
+      await featureApi.updateStatus(featureId, status)
       window.location.reload()
     } catch (error) {
       console.error('Error updating status:', error)

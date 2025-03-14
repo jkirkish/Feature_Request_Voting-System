@@ -1,6 +1,6 @@
 datasource db {
   provider = "mysql"
-  url      = "mysql://root:root@localhost:3306/voting_system"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -35,29 +35,33 @@ model Session {
 }
 
 model User {
-  id            String        @id @default(cuid())
-  name          String?
-  email         String?       @unique
-  emailVerified DateTime?
-  password      String?
-  image         String?
-  role          UserRole      @default(USER)
-  accounts      Account[]
-  sessions      Session[]
-  features      Feature[]
-  votes         FeatureVote[]
+  id                String        @id @default(cuid())
+  name              String?
+  email             String?       @unique
+  emailVerified     DateTime?
+  image             String?
+  password          String?
+  role              UserRole      @default(USER)
+  accounts          Account[]
+  sessions          Session[]
+  features          Feature[]
+  votes             FeatureVote[]
+  resetToken        String?       @db.Text
+  resetTokenExpiry  DateTime?
+  verificationToken String?       @db.Text
 }
 
 model Feature {
   id          String        @id @default(cuid())
-  title       String
-  description String
-  status      FeatureStatus @default(PENDING)
+  title       String        @db.VarChar(100)
+  description String        @db.VarChar(500)
   createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  creatorId   String
-  creator     User          @relation(fields: [creatorId], references: [id])
+  userId      String
+  status      FeatureStatus @default(PENDING)
+  user        User          @relation(fields: [userId], references: [id])
   votes       FeatureVote[]
+
+  @@index([userId])
 }
 
 model FeatureVote {
